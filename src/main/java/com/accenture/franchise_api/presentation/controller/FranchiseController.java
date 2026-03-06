@@ -1,54 +1,38 @@
 package com.accenture.franchise_api.presentation.controller;
 
-import com.accenture.franchise_api.application.service.FranchiseService;
+import com.accenture.franchise_api.application.usecase.CreateFranchiseUseCase;
+import com.accenture.franchise_api.application.usecase.GetTopProductsUseCase;
+import com.accenture.franchise_api.application.usecase.UpdateFranchiseNameUseCase;
 import com.accenture.franchise_api.domain.dto.BranchTopProductResponse;
 import com.accenture.franchise_api.domain.model.Franchise;
+import com.accenture.franchise_api.presentation.dto.CreateFranchiseRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
 public class FranchiseController {
 
-    private final FranchiseService franchiseService;
+    private final CreateFranchiseUseCase createFranchiseUseCase;
+    private final UpdateFranchiseNameUseCase updateFranchiseNameUseCase;
+    private final GetTopProductsUseCase getTopProductsUseCase;
 
     @PostMapping("/franchises")
-    public Mono<Franchise> createFranchise(@RequestBody Map<String, String> request) {
-        String name = request.get("name");
-        return franchiseService.createFranchise(name);
+    public Mono<Franchise> createFranchise(@Valid @RequestBody CreateFranchiseRequest request) {
+        return createFranchiseUseCase.execute(request.getName());
     }
 
-    @PostMapping("/franchises/{franchiseId}/branches")
-    public Mono<Franchise> addBranch(@PathVariable String franchiseId, @RequestBody Map<String, String> request) {
-        String name = request.get("name");
-        return franchiseService.addBranch(franchiseId, name);
-    }
-
-    @PostMapping("/branches/{branchId}/products")
-    public Mono<Franchise> addProduct(@PathVariable String branchId, @RequestBody Map<String, Object> request) {
-        String name = (String) request.get("name");
-        Integer stock = (Integer) request.get("stock");
-        return franchiseService.addProduct(branchId, name, stock);
-    }
-
-    @DeleteMapping("/branches/{branchId}/products/{productId}")
-    public Mono<Map<String, String>> deleteProduct(@PathVariable String branchId, @PathVariable String productId) {
-        return franchiseService.deleteProduct(branchId, productId)
-                .then(Mono.just(Map.of("message", "Producto eliminado correctamente")));
+    @PutMapping("/franchises/{id}/name")
+    public Mono<Franchise> updateFranchiseName(@PathVariable String id,
+            @Valid @RequestBody CreateFranchiseRequest request) {
+        return updateFranchiseNameUseCase.execute(id, request.getName());
     }
 
     @GetMapping("/franchises/{franchiseId}/top-products")
     public Flux<BranchTopProductResponse> getTopProducts(@PathVariable String franchiseId) {
-        return franchiseService.getTopProducts(franchiseId);
+        return getTopProductsUseCase.execute(franchiseId);
     }
 }

@@ -1,16 +1,18 @@
-package com.accenture.franchise_api.domain.model;
+package com.accenture.franchise_api.infrastructure.persistence.document;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product {
+public class BranchDocument {
     private String id;
     private String name;
-    private Integer stock;
+    private List<ProductDocument> products;
 }

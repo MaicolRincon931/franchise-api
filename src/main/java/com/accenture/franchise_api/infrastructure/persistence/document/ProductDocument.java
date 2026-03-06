@@ -1,4 +1,4 @@
-package com.accenture.franchise_api.domain.dto;
+package com.accenture.franchise_api.infrastructure.persistence.document;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BranchTopProductResponse {
-    private String branchName;
-    private String productName;
+public class ProductDocument {
+    private String id;
+    private String name;
     private Integer stock;
 }
