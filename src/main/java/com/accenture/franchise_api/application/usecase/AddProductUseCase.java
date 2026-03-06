@@ -1,5 +1,6 @@
 package com.accenture.franchise_api.application.usecase;
 
+import com.accenture.franchise_api.domain.exception.ResourceNotFoundException;
 import com.accenture.franchise_api.domain.model.Franchise;
 import com.accenture.franchise_api.domain.model.Product;
 import com.accenture.franchise_api.domain.repository.FranchiseRepository;
@@ -17,6 +18,7 @@ public class AddProductUseCase {
 
     public Mono<Franchise> execute(String branchId, String productName, Integer stock) {
         return repository.findByBranchId(branchId)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("Sucursal no encontrada con ID: " + branchId)))
                 .flatMap(franchise -> {
                     franchise.getBranches().stream()
                             .filter(b -> b.getId().equals(branchId))

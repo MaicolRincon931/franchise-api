@@ -1,5 +1,6 @@
 package com.accenture.franchise_api.application.usecase;
 
+import com.accenture.franchise_api.domain.exception.ResourceNotFoundException;
 import com.accenture.franchise_api.domain.model.Franchise;
 import com.accenture.franchise_api.domain.repository.FranchiseRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ public class UpdateProductNameUseCase {
 
     public Mono<Franchise> execute(String productId, String newName) {
         return repository.findByProductId(productId)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("Producto no encontrado con ID: " + productId)))
                 .flatMap(franchise -> {
                     franchise.getBranches().forEach(branch -> {
                         branch.getProducts().stream()

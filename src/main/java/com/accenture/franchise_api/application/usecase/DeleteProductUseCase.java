@@ -1,5 +1,6 @@
 package com.accenture.franchise_api.application.usecase;
 
+import com.accenture.franchise_api.domain.exception.ResourceNotFoundException;
 import com.accenture.franchise_api.domain.model.Franchise;
 import com.accenture.franchise_api.domain.repository.FranchiseRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,12 +15,16 @@ public class DeleteProductUseCase {
 
     public Mono<Void> execute(String branchId, String productId) {
         return repository.findByBranchId(branchId)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("Sucursal no encontrada con ID: " + branchId)))
                 .flatMap(franchise -> {
                     franchise.getBranches().stream()
                             .filter(b -> b.getId().equals(branchId))
                             .findFirst()
                             .ifPresent(branch -> {
-                                branch.getProducts().removeIf(p -> p.getId().equals(productId));
+                                boolean removed = branch.getProducts().removeIf(p -> p.getId().equals(productId));
+                                if (!removed) {
+                                    throw new ResourceNotFoundException("Producto no encontrado con ID: " + productId);
+                                }
                             });
                     return repository.save(franchise);
                 })
