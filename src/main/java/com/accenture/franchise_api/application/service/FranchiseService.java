@@ -1,12 +1,15 @@
 package com.accenture.franchise_api.application.service;
 
+import com.accenture.franchise_api.domain.model.Branch;
 import com.accenture.franchise_api.domain.model.Franchise;
+import com.accenture.franchise_api.domain.model.Product;
 import com.accenture.franchise_api.infrastructure.repository.MongoFranchiseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,13 +28,30 @@ public class FranchiseService {
     public Mono<Franchise> addBranch(String franchiseId, String branchName) {
         return franchiseRepository.findById(franchiseId)
                 .flatMap(franchise -> {
-                    com.accenture.franchise_api.domain.model.Branch branch = com.accenture.franchise_api.domain.model.Branch
-                            .builder()
-                            .id(java.util.UUID.randomUUID().toString())
+                    Branch branch = Branch.builder()
+                            .id(UUID.randomUUID().toString())
                             .name(branchName)
                             .products(new ArrayList<>())
                             .build();
                     franchise.getBranches().add(branch);
+                    return franchiseRepository.save(franchise);
+                });
+    }
+
+    public Mono<Franchise> addProduct(String branchId, String productName, Integer stock) {
+        return franchiseRepository.findByBranchesId(branchId)
+                .flatMap(franchise -> {
+                    franchise.getBranches().stream()
+                            .filter(b -> b.getId().equals(branchId))
+                            .findFirst()
+                            .ifPresent(branch -> {
+                                Product product = Product.builder()
+                                        .id(UUID.randomUUID().toString())
+                                        .name(productName)
+                                        .stock(stock)
+                                        .build();
+                                branch.getProducts().add(product);
+                            });
                     return franchiseRepository.save(franchise);
                 });
     }
