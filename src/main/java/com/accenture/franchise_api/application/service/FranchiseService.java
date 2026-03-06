@@ -21,4 +21,18 @@ public class FranchiseService {
                 .build();
         return franchiseRepository.save(franchise);
     }
+
+    public Mono<Franchise> addBranch(String franchiseId, String branchName) {
+        return franchiseRepository.findById(franchiseId)
+                .flatMap(franchise -> {
+                    com.accenture.franchise_api.domain.model.Branch branch = com.accenture.franchise_api.domain.model.Branch
+                            .builder()
+                            .id(java.util.UUID.randomUUID().toString())
+                            .name(branchName)
+                            .products(new ArrayList<>())
+                            .build();
+                    franchise.getBranches().add(branch);
+                    return franchiseRepository.save(franchise);
+                });
+    }
 }
