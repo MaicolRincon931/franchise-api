@@ -3,6 +3,7 @@ package com.accenture.franchise_api.presentation.controller;
 import com.accenture.franchise_api.application.service.FranchiseService;
 import com.accenture.franchise_api.domain.model.Franchise;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,5 +36,10 @@ public class FranchiseController {
         String name = (String) request.get("name");
         Integer stock = (Integer) request.get("stock");
         return franchiseService.addProduct(branchId, name, stock);
+    }
+
+    @DeleteMapping("/branches/{branchId}/products/{productId}")
+    public Mono<Void> deleteProduct(@PathVariable String branchId, @PathVariable String productId) {
+        return franchiseService.deleteProduct(branchId, productId);
     }
 }

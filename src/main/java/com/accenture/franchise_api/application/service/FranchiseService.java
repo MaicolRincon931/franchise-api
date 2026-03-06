@@ -55,4 +55,18 @@ public class FranchiseService {
                     return franchiseRepository.save(franchise);
                 });
     }
+
+    public Mono<Void> deleteProduct(String branchId, String productId) {
+        return franchiseRepository.findByBranchesId(branchId)
+                .flatMap(franchise -> {
+                    franchise.getBranches().stream()
+                            .filter(b -> b.getId().equals(branchId))
+                            .findFirst()
+                            .ifPresent(branch -> {
+                                branch.getProducts().removeIf(p -> p.getId().equals(productId));
+                            });
+                    return franchiseRepository.save(franchise);
+                })
+                .then();
+    }
 }
