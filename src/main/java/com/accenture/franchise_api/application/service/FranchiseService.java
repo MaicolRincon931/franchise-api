@@ -1,14 +1,17 @@
 package com.accenture.franchise_api.application.service;
 
+import com.accenture.franchise_api.domain.dto.BranchTopProductResponse;
 import com.accenture.franchise_api.domain.model.Branch;
 import com.accenture.franchise_api.domain.model.Franchise;
 import com.accenture.franchise_api.domain.model.Product;
 import com.accenture.franchise_api.infrastructure.repository.MongoFranchiseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.UUID;
 
 @Service
@@ -68,5 +71,21 @@ public class FranchiseService {
                     return franchiseRepository.save(franchise);
                 })
                 .then();
+    }
+
+    public Flux<BranchTopProductResponse> getTopProducts(String franchiseId) {
+        return franchiseRepository.findById(franchiseId)
+                .flatMapIterable(Franchise::getBranches)
+                .map(branch -> {
+                    Product topProduct = branch.getProducts().stream()
+                            .max(Comparator.comparingInt(Product::getStock))
+                            .orElse(Product.builder().name("No Products").stock(0).build());
+
+                    return BranchTopProductResponse.builder()
+                            .branchName(branch.getName())
+                            .productName(topProduct.getName())
+                            .stock(topProduct.getStock())
+                            .build();
+                });
     }
 }

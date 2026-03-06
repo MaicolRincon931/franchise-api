@@ -1,14 +1,17 @@
 package com.accenture.franchise_api.presentation.controller;
 
 import com.accenture.franchise_api.application.service.FranchiseService;
+import com.accenture.franchise_api.domain.dto.BranchTopProductResponse;
 import com.accenture.franchise_api.domain.model.Franchise;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
@@ -39,7 +42,13 @@ public class FranchiseController {
     }
 
     @DeleteMapping("/branches/{branchId}/products/{productId}")
-    public Mono<Void> deleteProduct(@PathVariable String branchId, @PathVariable String productId) {
-        return franchiseService.deleteProduct(branchId, productId);
+    public Mono<Map<String, String>> deleteProduct(@PathVariable String branchId, @PathVariable String productId) {
+        return franchiseService.deleteProduct(branchId, productId)
+                .then(Mono.just(Map.of("message", "Producto eliminado correctamente")));
+    }
+
+    @GetMapping("/franchises/{franchiseId}/top-products")
+    public Flux<BranchTopProductResponse> getTopProducts(@PathVariable String franchiseId) {
+        return franchiseService.getTopProducts(franchiseId);
     }
 }
